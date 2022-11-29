@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 	"math/rand"
 	"net"
@@ -188,6 +189,7 @@ func (s *Session) addSendStream(qstr quic.SendStream) SendStream {
 // addIncomingStream adds a bidirectional stream that the remote peer opened
 func (s *Session) addIncomingStream(qstr quic.Stream) {
 	s.closeMx.Lock()
+	fmt.Println("addIncomingStream got lock")
 	closeErr := s.closeErr
 	if closeErr != nil {
 		s.closeMx.Unlock()
@@ -204,6 +206,7 @@ func (s *Session) addIncomingStream(qstr quic.Stream) {
 // addIncomingUniStream adds a unidirectional stream that the remote peer opened
 func (s *Session) addIncomingUniStream(qstr quic.ReceiveStream) {
 	s.closeMx.Lock()
+	fmt.Println("addIncomingUniStream got lock")
 	closeErr := s.closeErr
 	if closeErr != nil {
 		s.closeMx.Unlock()
@@ -271,6 +274,7 @@ func (s *Session) AcceptUniStream(ctx context.Context) (ReceiveStream, error) {
 
 func (s *Session) OpenStream() (Stream, error) {
 	s.closeMx.Lock()
+	fmt.Println("OpenStrean got lock")
 	defer s.closeMx.Unlock()
 
 	if s.closeErr != nil {
@@ -296,6 +300,7 @@ rand:
 
 func (s *Session) OpenStreamSync(ctx context.Context) (str Stream, err error) {
 	s.closeMx.Lock()
+	fmt.Println("Openstreamsync got lock")
 	if s.closeErr != nil {
 		s.closeMx.Unlock()
 		return nil, s.closeErr
@@ -306,6 +311,7 @@ func (s *Session) OpenStreamSync(ctx context.Context) (str Stream, err error) {
 
 	defer func() {
 		s.closeMx.Lock()
+		fmt.Println("openstreamsync defer got lock")
 		closeErr := s.closeErr
 		delete(s.streamCtxs, id)
 		s.closeMx.Unlock()
@@ -324,6 +330,7 @@ func (s *Session) OpenStreamSync(ctx context.Context) (str Stream, err error) {
 
 func (s *Session) OpenUniStream() (SendStream, error) {
 	s.closeMx.Lock()
+	fmt.Println("open uni stream got lock")
 	defer s.closeMx.Unlock()
 
 	if s.closeErr != nil {
@@ -338,6 +345,7 @@ func (s *Session) OpenUniStream() (SendStream, error) {
 
 func (s *Session) OpenUniStreamSync(ctx context.Context) (str SendStream, err error) {
 	s.closeMx.Lock()
+	fmt.Println("openunistreamsync got lock")
 	if s.closeErr != nil {
 		s.closeMx.Unlock()
 		return nil, s.closeErr
@@ -348,6 +356,7 @@ func (s *Session) OpenUniStreamSync(ctx context.Context) (str SendStream, err er
 
 	defer func() {
 		s.closeMx.Lock()
+		fmt.Println("openunistreamsync defer got lock")
 		closeErr := s.closeErr
 		delete(s.streamCtxs, id)
 		s.closeMx.Unlock()
@@ -374,6 +383,7 @@ func (s *Session) RemoteAddr() net.Addr {
 
 func (s *Session) CloseWithError(code SessionErrorCode, msg string) error {
 	s.closeMx.Lock()
+	fmt.Println("close with error got lock")
 	s.closeErr = &ConnectionError{
 		ErrorCode: code,
 		Message:   msg,
